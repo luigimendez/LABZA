@@ -9,15 +9,15 @@ from datetime import date
 data_file = "pacientes_labza.xlsx"
 if not os.path.exists(data_file):
     df = pd.DataFrame(columns=["Nombre", "Teléfono", "Edad", "Estudios", "Fecha", "Costo"])
-    df.to_excel(data_file, index=False)
+    df.to_excel(data_file, index=False, engine='openpyxl')
 
 def cargar_datos():
-    return pd.read_excel(data_file)
+    return pd.read_excel(data_file, engine='openpyxl')
 
 def guardar_datos(nuevo):
     df = cargar_datos()
     df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
-    df.to_excel(data_file, index=False)
+    df.to_excel(data_file, index=False, engine='openpyxl')
 
 def app():
     st.title("Laboratorio de Análisis Clínicos LABZA")
