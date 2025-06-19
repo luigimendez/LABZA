@@ -1,24 +1,30 @@
-
-
 import streamlit as st
 import pandas as pd
 import os
 from datetime import date
 
-# Archivo de datos
+# Nombre del archivo de Excel
 data_file = "pacientes_labza.xlsx"
+
+# Asegura que exista el archivo con columnas iniciales
 if not os.path.exists(data_file):
     df = pd.DataFrame(columns=["Nombre", "Teléfono", "Edad", "Estudios", "Fecha", "Costo"])
     df.to_excel(data_file, index=False, engine='openpyxl')
 
+# Función para cargar datos del archivo
 def cargar_datos():
-    return pd.read_excel(data_file, engine='openpyxl')
+    if os.path.exists(data_file):
+        return pd.read_excel(data_file, engine='openpyxl')
+    else:
+        return pd.DataFrame(columns=["Nombre", "Teléfono", "Edad", "Estudios", "Fecha", "Costo"])
 
+# Función para guardar un nuevo paciente
 def guardar_datos(nuevo):
     df = cargar_datos()
     df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
     df.to_excel(data_file, index=False, engine='openpyxl')
 
+# Función principal de la app
 def app():
     st.title("Laboratorio de Análisis Clínicos LABZA")
 
@@ -30,6 +36,7 @@ def app():
         nombre = st.text_input("Nombre completo")
         telefono = st.text_input("Teléfono")
         edad = st.number_input("Edad", min_value=0, max_value=120, step=1)
+
         estudios_opciones = [
             "Biometria Hematica", "SMAC 24", "SMAC 30", "RX Frebiles", "Examen Prenatales",
             "Glucosa-Colesterol-Trigliceridos", "Examen Prenupciales", "Perfil Tiroideo Completo 5",
@@ -67,8 +74,13 @@ def app():
         df = cargar_datos()
         st.dataframe(df)
 
-        if st.download_button("📥 Exportar a Excel", df.to_excel(index=False), file_name="pacientes_labza_export.xlsx"):
-            st.success("Archivo exportado correctamente.")
+        excel_bytes = df.to_excel(index=False, engine='openpyxl')
+        st.download_button(
+            label="📥 Exportar a Excel",
+            data=excel_bytes,
+            file_name="pacientes_labza_export.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
     elif menu == "Buscar Paciente":
         st.header("Buscar paciente por nombre")
@@ -81,5 +93,6 @@ def app():
             else:
                 st.info("🔍 No se encontraron pacientes con ese nombre.")
 
+# Ejecutar la app
 if __name__ == "__main__":
     app()
